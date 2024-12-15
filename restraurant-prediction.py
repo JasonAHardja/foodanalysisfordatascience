@@ -45,7 +45,7 @@ def process_food_data(file_path, category):
     # Sort by "Qty" in descending order and get only the top 3 results
     result = grouped_df.sort_values(by=qty_col, ascending=False).head(3).reset_index(drop=True)
 
-    # Rename the columns as requested
+    # Renaming columns
     result = result.rename(columns={
         "original_menu": "menu",
         qty_col: "order amount",
@@ -68,21 +68,21 @@ def predict_monthly_stock(df):
     df['month'] = df[date_col].dt.month
     monthly_sales = df.groupby(['month', 'original_menu'])['qty'].sum().reset_index()
     
-    # Calculate predictions for each menu item
+    # The predictions for each food and drinks.
     predictions = []
     for menu in monthly_sales['original_menu'].unique():
         menu_data = monthly_sales[monthly_sales['original_menu'] == menu].sort_values('month')
         
         if len(menu_data) > 0:
             quantities = menu_data['qty'].tolist()
-            changes = [0]  # First month has no change
+            changes = [0]  # First month = no change
             
-            # Calculate monthly changes
+            # monthly changes
             for i in range(1, len(quantities)):
                 change = quantities[i] - quantities[i-1]
                 changes.append(change)
             
-            # Calculate needed stock (last month's quantity + 25% safety stock)
+            # needed stock (last month's quantity + 25% safety stock)
             last_month_qty = quantities[-1]
             needed_stock = int(last_month_qty * 1.25)
             
@@ -103,6 +103,9 @@ def save_to_csv(dataframe, output_file):
 
 if __name__ == "__main__":
     # File path
+
+    #BIG IMPORTANT IMFORMATION: Remember to change this file path to your correct location
+    #This code is working for Mac, but idk for PC. Sorry.
     file_path = "/Users/jasonhardjawidjaja/Desktop/4 Sales Recapitulation Detail Report april 2024.csv"
 
     try:
@@ -114,7 +117,7 @@ if __name__ == "__main__":
         save_to_csv(top_foods_summary, "Top_3_Makanan.csv")
         save_to_csv(top_drinks_summary, "Top_3_Minuman.csv")
 
-        # Generate and save predictions
+        # Creates the predictions here
         food_predictions = predict_monthly_stock(foods_df)
         drink_predictions = predict_monthly_stock(drinks_df)
         
